@@ -21,8 +21,7 @@ RUN pip install --upgrade pip \
 # Copy application code
 COPY . .
 
-# (Optional) Collect static files for Django
-RUN python manage.py collectstatic --noinput
+
 
 EXPOSE 8000
 
