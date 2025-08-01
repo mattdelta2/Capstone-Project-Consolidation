@@ -1,5 +1,13 @@
 # news/models.py
 
+"""
+Defines the core data models for the News Portal application, including:
+- CustomUser: extends Django’s user with roles and follow relationships.
+- Publisher: represents media outlets and their staff.
+- Article: news articles written by users.
+- Newsletter: periodic newsletters authored by journalists.
+"""
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.urls import reverse
@@ -7,6 +15,20 @@ from django.conf import settings
 
 
 class CustomUser(AbstractUser):
+    """
+    Extends AbstractUser to include role-based permissions and subscriptions.
+
+    Roles:
+        reader:   Can read articles and follow publishers/journalists.
+        journalist:  Can author articles and newsletters.
+        editor:   Can review and approve or deny content.
+
+    Attributes:
+        role (str): The user’s role, chosen from ROLE_CHOICES.
+        subscriptions_publishers (ManyToMany): Publishers this user follows.
+        subscriptions_journalists (ManyToMany): Journalists this user follows.
+    """
+
     ROLE_READER = 'reader'
     ROLE_JOURNALIST = 'journalist'
     ROLE_EDITOR = 'editor'
@@ -23,7 +45,6 @@ class CustomUser(AbstractUser):
         default=ROLE_READER,
     )
 
-    # Which publishers this user follows
     subscriptions_publishers = models.ManyToManyField(
         'Publisher',
         blank=True,
@@ -31,7 +52,6 @@ class CustomUser(AbstractUser):
         help_text='Publishers you follow'
     )
 
-    # Which journalists this user follows
     subscriptions_journalists = models.ManyToManyField(
         'self',
         blank=True,
@@ -41,19 +61,35 @@ class CustomUser(AbstractUser):
     )
 
     def is_reader(self):
+        """Return True if the user’s role is ‘reader’."""
         return self.role == self.ROLE_READER
 
     def is_journalist(self):
+        """Return True if the user’s role is ‘journalist’."""
         return self.role == self.ROLE_JOURNALIST
 
     def is_editor(self):
+        """Return True if the user’s role is ‘editor’."""
         return self.role == self.ROLE_EDITOR
 
     def __str__(self):
+        """
+        Return the username and role for readability in Django admin and shell.
+        """
         return f"{self.username} ({self.get_role_display()})"
 
 
 class Publisher(models.Model):
+    """
+    Represents a media publisher, with associated editors and journalists.
+
+    Attributes:
+        name (str): Name of the publisher.
+        description (str): Optional description.
+        editors (ManyToMany): Users with editor role.
+        journalists (ManyToMany): Users with journalist role.
+    """
+
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
 
@@ -72,10 +108,23 @@ class Publisher(models.Model):
         verbose_name_plural = 'Publishers'
 
     def __str__(self):
+        """Return the publisher’s name."""
         return self.name
 
 
 class Article(models.Model):
+    """
+    A news article submitted by a journalist and optionally reviewed by an editor.
+
+    Attributes:
+        title (str): Headline of the article.
+        body (TextField): Main content.
+        created_at (datetime): Timestamp when created.
+        status (str): Review status, one of STATUS_CHOICES.
+        publisher (ForeignKey): Publisher under which the article appears.
+        author (ForeignKey): Journalist who wrote the article.
+    """
+
     STATUS_PENDING = 'PENDING'
     STATUS_APPROVED = 'APPROVED'
     STATUS_DENIED = 'DENIED'
@@ -110,16 +159,34 @@ class Article(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
+        """Return the article’s title for display purposes."""
         return self.title
 
     def is_approved(self):
+        """Return True if the article’s status is approved."""
         return self.status == self.STATUS_APPROVED
 
     def get_absolute_url(self):
+        """
+        Build and return the URL to view this article’s detail page.
+        """
         return reverse('news:article-detail', args=[self.pk])
 
 
 class Newsletter(models.Model):
+    """
+    A periodic newsletter authored by a journalist, optionally linked to a publisher.
+
+    Attributes:
+        title (str): Newsletter title.
+        body (TextField): Newsletter content.
+        author (ForeignKey): Journalist authoring the newsletter.
+        publisher (ForeignKey, optional): Associated publisher.
+        status (str): Review status, one of STATUS_CHOICES.
+        created_at (datetime): Creation timestamp.
+        updated_at (datetime): Last update timestamp.
+    """
+
     STATUS_PENDING = "P"
     STATUS_APPROVED = "A"
     STATUS_DENIED = "D"
@@ -154,4 +221,5 @@ class Newsletter(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
+        """Return the newsletter’s title."""
         return self.title
