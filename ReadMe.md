@@ -18,8 +18,7 @@ A Django-based news management platform with role-based CR​UD, subscription ne
 - [API Documentation](#api-documentation)  
 - [Testing & Coverage](#testing--coverage)  
 - [Common Issues](#common-issues)  
-- [Contributing](#contributing)  
-- [License](#license)  
+ 
 
 ---
 
