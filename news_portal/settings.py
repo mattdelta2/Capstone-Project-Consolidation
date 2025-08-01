@@ -13,7 +13,10 @@ load_dotenv(BASE_DIR / '.env')
 # SECURITY
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+
+# for development
+ALLOWED_HOSTS = ['*']
 
 # Custom user model
 AUTH_USER_MODEL = 'news.CustomUser'
