@@ -1,0 +1,44 @@
+{# news/templates/news/article_form.html #}
+{% extends "base.html" %}
+{% load i18n static widget_tweaks %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">
+    {% if form.instance.pk %}
+      ✏️ Edit Article
+    {% else %}
+      📝 New Article
+    {% endif %}
+  </h2>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    {% for field in form %}
+      <div class="mb-3">
+        <label class="form-label">{{ field.label }}</label>
+        {% render_field field class="form-control" %}
+        {% if field.errors %}
+          <div class="invalid-feedback d-block">
+            {{ field.errors.0 }}
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-success me-2">
+      {% trans "Save" %}
+    </button>
+    <a href="{% url 'news:article-list' %}" class="btn btn-secondary">
+      {% trans "Cancel" %}
+    </a>
+  </form>
+</div>
+{% endblock %}

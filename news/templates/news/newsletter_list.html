@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+  <div class="container mt-4">
+
+    <h1 class="mb-4">📬 All Newsletters</h1>
+
+    <div class="btn-group mb-4" role="group">
+      <a
+        href="{% url 'news:newsletter-list' %}"
+        class="btn btn-outline-primary {% if not request.GET.view %}active{% endif %}"
+      >
+        Latest
+      </a>
+      {% if user.is_authenticated and user.role == 'reader' %}
+        <a
+          href="{% url 'news:newsletter-list' %}?view=subscribed"
+          class="btn btn-outline-primary {% if request.GET.view == 'subscribed' %}active{% endif %}"
+        >
+          Subscribed
+        </a>
+      {% endif %}
+    </div>
+
+    {% for nl in newsletters %}
+      <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">{{ nl.title }}</h5>
+          <p class="card-subtitle text-muted mb-2">
+            By {{ nl.author.username }} on {{ nl.created_at|date:"F d, Y" }}
+          </p>
+          <p class="card-text">{{ nl.body|truncatechars:100 }}</p>
+          <a href="{% url 'news:newsletter-detail' nl.pk %}" class="btn btn-sm btn-primary">
+            Read more
+          </a>
+        </div>
+      </div>
+    {% empty %}
+      <div class="alert alert-info">No newsletters found.</div>
+    {% endfor %}
+
+    {% if is_paginated %}
+      <nav aria-label="Newsletter pagination">
+        <ul class="pagination justify-content-center mt-4">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a
+                class="page-link"
+                href="?page={{ page_obj.previous_page_number }}{% if request.GET.view %}&view={{ request.GET.view }}{% endif %}"
+              >
+                &laquo; Previous
+              </a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">&laquo; Previous</span>
+            </li>
+          {% endif %}
+
+          {% for num in paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+              <a
+                class="page-link"
+                href="?page={{ num }}{% if request.GET.view %}&view={{ request.GET.view }}{% endif %}"
+              >
+                {{ num }}
+              </a>
+            </li>
+          {% endfor %}
+
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a
+                class="page-link"
+                href="?page={{ page_obj.next_page_number }}{% if request.GET.view %}&view={{ request.GET.view }}{% endif %}"
+              >
+                Next &raquo;
+              </a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">Next &raquo;</span>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  </div>
+{% endblock %}

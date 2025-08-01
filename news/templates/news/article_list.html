@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+  <div class="container mt-4">
+
+    <h1 class="mb-4">📰 Latest Articles</h1>
+
+    <div class="btn-group mb-4" role="group">
+      <a
+        href="{% url 'news:article-list' %}"
+        class="btn btn-outline-primary {% if not request.GET.view %}active{% endif %}"
+      >
+        Latest
+      </a>
+
+      {% if user.is_authenticated and user.role == 'reader' %}
+        <a
+          href="{% url 'news:article-list' %}?view=subscribed"
+          class="btn btn-outline-primary {% if request.GET.view == 'subscribed' %}active{% endif %}"
+        >
+          Subscribed
+        </a>
+      {% endif %}
+    </div>
+
+    {% for article in articles %}
+      <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">{{ article.title }}</h5>
+          <p class="card-subtitle text-muted mb-2">
+            By {{ article.author.username }} on {{ article.created_at|date:"F d, Y" }}
+          </p>
+          <p class="card-text">{{ article.body|truncatechars:100 }}</p>
+          <a href="{{ article.get_absolute_url }}" class="btn btn-sm btn-primary">
+            Read more
+          </a>
+        </div>
+      </div>
+    {% empty %}
+      <div class="alert alert-info">
+        No articles found.
+      </div>
+    {% endfor %}
+
+    {# Optional pagination block, if you're using pagination #}
+    {% if is_paginated %}
+      <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center mt-4">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.view %}&view={{ request.GET.view }}{% endif %}">
+                Previous
+              </a>
+            </li>
+          {% endif %}
+
+          <li class="page-item active">
+            <span class="page-link">{{ page_obj.number }}</span>
+          </li>
+
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.view %}&view={{ request.GET.view }}{% endif %}">
+                Next
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  </div>
+{% endblock %}

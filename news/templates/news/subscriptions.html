@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+  <div class="container mt-4">
+
+    <a href="{% url 'news:article-list' %}" class="btn btn-secondary mb-3">
+      ← Back to Home
+    </a>
+
+    <h3 class="mb-4">🗞 Articles from Your Subscriptions</h3>
+
+    {% if articles %}
+      <div class="list-group">
+        {% for art in articles %}
+          <div class="list-group-item mb-2 shadow-sm">
+            <h5 class="mb-1">
+              <a href="{% url 'news:article-detail' art.pk %}" class="text-decoration-none fw-semibold">
+                {{ art.title }}
+              </a>
+            </h5>
+            <small class="text-muted">
+              By {{ art.author.username }} on {{ art.created_at|date:"F d, Y" }} in {{ art.publisher.name }}
+            </small>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert alert-info">
+        No articles to show from your subscriptions.
+      </div>
+    {% endif %}
+    
+  </div>
+{% endblock %}

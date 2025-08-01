@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container mt-5">
+    <h2 class="mb-4">📋 Pending Articles</h2>
+
+    <table class="table table-hover table-responsive mt-3">
+      <thead class="table-light">
+        <tr>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Category</th>
+          <th>Submitted At</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for art in pending_articles %}
+          <tr>
+            <td>
+              <a href="{% url 'news:article-detail' art.pk %}" class="fw-semibold text-decoration-none">
+                {{ art.title }}
+              </a>
+            </td>
+            <td>{{ art.author.username }}</td>
+            <td>{{ art.category.name }}</td>
+            <td>{{ art.created_at|date:"Y-m-d H:i" }}</td>
+            <td>
+              <div class="btn-group" role="group">
+                <a href="{% url 'news:article-approve' art.pk %}" class="btn btn-sm btn-success">
+                  ✅ Approve
+                </a>
+                <a href="{% url 'news:article-deny' art.pk %}" class="btn btn-sm btn-danger">
+                  ❌ Deny
+                </a>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5" class="text-center text-muted">
+              No pending articles
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

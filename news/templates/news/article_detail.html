@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+  <div class="container mt-4">
+
+    <a href="{% url 'news:article-list' %}" class="btn btn-secondary mb-3">
+      ← Back to Articles
+    </a>
+
+    <h1 class="mb-3">{{ object.title }}</h1>
+    <p class="text-muted">
+      By <strong>{{ object.author.username }}</strong> on {{ object.created_at|date:"F d, Y" }}
+    </p>
+    <hr>
+
+    <div class="mb-4 card p-3">
+      {{ object.body }}
+    </div>
+
+    {# Author edit/delete buttons #}
+    {% if user.is_authenticated and user == object.author %}
+      <div class="btn-group mb-3" role="group">
+        <a href="{% url 'news:article-update' object.pk %}" class="btn btn-outline-primary">Edit</a>
+        <form action="{% url 'news:article-delete' object.pk %}" method="post">
+          {% csrf_token %}
+          <button class="btn btn-outline-danger">Delete</button>
+        </form>
+      </div>
+    {% endif %}
+
+    {# Editor review buttons #}
+    {% if can_review and object.status == object.STATUS_PENDING %}
+      <hr>
+      <h5>🛠 Editor Review</h5>
+      <div class="btn-group mb-3" role="group">
+        <form action="{% url 'news:article-approve' object.pk %}" method="post">
+          {% csrf_token %}
+          <button class="btn btn-success">Approve</button>
+        </form>
+        <form action="{% url 'news:article-deny' object.pk %}" method="post">
+          {% csrf_token %}
+          <button class="btn btn-danger">Deny</button>
+        </form>
+      </div>
+    {% endif %}
+
+    {% if can_review %}
+      <p class="mt-3">
+        <strong>Status:</strong> {{ object.get_status_display }}
+      </p>
+    {% endif %}
+
+    {# Reader subscription controls (only for logged-in non-editors) #}
+    {% if user.is_authenticated and not can_review %}
+      <div class="border rounded p-3 bg-light mt-4">
+        <h5>🔔 Manage Your Subscriptions</h5>
+        <div class="d-flex flex-wrap gap-2">
+          
+          {# Author subscribe/unsubscribe #}
+          {% if subscribed_to_author %}
+            <form method="post" action="{% url 'news:unsubscribe-journalist' object.author.pk %}?next={{ request.path }}">
+              {% csrf_token %}
+              <button class="btn btn-outline-danger">
+                Unsubscribe from {{ object.author.username }}
+              </button>
+            </form>
+          {% else %}
+            <form method="post" action="{% url 'news:subscribe-journalist' object.author.pk %}?next={{ request.path }}">
+              {% csrf_token %}
+              <button class="btn btn-primary">
+                Subscribe to {{ object.author.username }}
+              </button>
+            </form>
+          {% endif %}
+
+          {# Publisher subscribe/unsubscribe #}
+          {% if subscribed_to_publisher %}
+            <form method="post" action="{% url 'news:unsubscribe-publisher' object.publisher.pk %}?next={{ request.path }}">
+              {% csrf_token %}
+              <button class="btn btn-outline-danger">
+                Unsubscribe from {{ object.publisher.name }}
+              </button>
+            </form>
+          {% else %}
+            <form method="post" action="{% url 'news:subscribe-publisher' object.publisher.pk %}?next={{ request.path }}">
+              {% csrf_token %}
+              <button class="btn btn-primary">
+                Subscribe to {{ object.publisher.name }}
+              </button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

@@ -1,0 +1,151 @@
+{
+  "info": {
+    "name": "NewsPortal API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "b2f4a1e8-1234-5678-9abc-0def12345678"
+  },
+  "item": [
+    {
+      "name": "Get Auth Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\":\"reader1\",\"password\":\"pass1234\"}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/token",
+          "host": ["{{base_url}}"],
+          "path": ["api","auth","token"]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "let json = pm.response.json();",
+              "pm.test(\"Token present\", function() {",
+              "    pm.expect(json).to.have.property('token');",
+              "});",
+              "",
+              "// Save token into environment",
+              "pm.environment.set(\"token\", json.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List Articles",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Token {{token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/articles",
+          "host": ["{{base_url}}"],
+          "path": ["api","articles"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Response is an array\", () => pm.expect(pm.response.json()).to.be.an('array'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List Publishers",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Token {{token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/publishers",
+          "host": ["{{base_url}}"],
+          "path": ["api","publishers"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Has at least one publisher\", () => pm.expect(pm.response.json().length).to.be.above(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List Journalists",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Token {{token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/journalists",
+          "host": ["{{base_url}}"],
+          "path": ["api","journalists"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Has at least one journalist\", () => pm.expect(pm.response.json().length).to.be.above(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get Article Detail",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Token {{token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/articles/{{article_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api","articles","{{article_id}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Has correct ID\", () => {",
+              "    let json = pm.response.json();",
+              "    pm.expect(json.id).to.eql(parseInt(pm.variables.get('article_id')));",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
