@@ -9,7 +9,7 @@ __pycache__/
 *$py.class
 
 # Environment variables file
-.env
+
 
 # Django media & static collect
 staticfiles/
