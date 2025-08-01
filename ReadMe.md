@@ -1,8 +1,8 @@
 # News Application
 
-## Description
+[![Build Status](https://img.shields.io/github/actions/workflow/status/mattdelta2/Capstone-Project-Consolidation/ci.yml?branch=main)](https://github.com/mattdelta2/Capstone-Project-Consolidation/actions) [![Coverage](https://img.shields.io/codecov/c/github/mattdelta2/Capstone-Project-Consolidation)](https://codecov.io/gh/mattdelta2/Capstone-Project-Consolidation) [![Docker Pulls](https://img.shields.io/docker/pulls/mattdelta2/newsapp)](https://hub.docker.com/r/mattdelta2/newsapp)
 
-This Django-based News Application enables role-based article management, newsletter subscriptions, and automatic email (and X) dispatch on publication. Readers can subscribe to publishers or individual journalists; editors approve and publish articles.
+A Django-based news management platform with role-based CR​UD, subscription newsletters, and automated email/X dispatch upon publication.
 
 ---
 
@@ -12,149 +12,144 @@ This Django-based News Application enables role-based article management, newsle
 - [Tech Stack](#tech-stack)  
 - [Prerequisites](#prerequisites)  
 - [Installation & Setup](#installation--setup)  
+  - [Local Development](#local-development)  
+  - [Docker (Recommended)](#docker-recommended)  
 - [Running the Application](#running-the-application)  
-- [Running Tests](#running-tests)    
+- [API Documentation](#api-documentation)  
+- [Testing & Coverage](#testing--coverage)  
 - [Common Issues](#common-issues)  
-- [API Endpoints](#api-endpoints)  
+- [Contributing](#contributing)  
+- [License](#license)  
 
 ---
 
 ## Features
 
 - Custom user model with roles: Reader, Journalist, Editor  
-- Group-based permissions enforcing CRUD by role  
+- Group-based permissions enforcing role-specific CRUD  
 - Reader subscriptions to publishers or journalists  
 - Editor approval workflow with access control  
-- Approved-article signals to email subscribers and post to X  
-- RESTful API for third-party clients: serializers, views, URLs  
-- Unit tests (pytest) covering API and core logic  
-- MariaDB as the production database backend  
+- Signals to email subscribers and post to X on article publication  
+- RESTful API (serializers, viewsets, routers)  
+- Unit tests via pytest targeting 100% coverage  
+- MariaDB as production-grade backend  
 
 ---
 
 ## Tech Stack
 
-| Component         | Technology / Library          |
-|-------------------|-------------------------------|
-| Web Framework     | Django                        |
-| REST API          | Django REST Framework         |
-| Authentication    | DRF Token Authentication      |
-| Email Dispatch    | Django’s built-in mailer      |
-| Dispatch Signals  | Django signals                |
-| Database          | MariaDB                       |
-| Testing           | pytest                        |
-| Markdown Editing  | Django-MarkdownX              |
-| Tagging           | django-taggit                 |
-| Frontend Styling  | Bootstrap                     |
+| Layer             | Technology / Library      |
+|-------------------|---------------------------|
+| Web Framework     | Django                    |
+| API Toolkit       | Django REST Framework     |
+| Auth              | DRF Token Authentication  |
+| Database          | MariaDB                   |
+| Email Dispatch    | Django Mailer            |
+| Pub/Sub Signals   | Django Signals            |
+| Frontend Styling  | Bootstrap                 |
+| Markdown Editing  | Django-MarkdownX          |
+| Tagging           | django-taggit             |
+| Testing           | pytest, pytest-cov        |
+| Containerization  | Docker, docker-compose    |
 
 ---
 
 ## Prerequisites
 
-- Python 3.10 or higher  
-- MariaDB server  
-- (Optional) API-client tool like Postman for testing  
+- Python 3.10+  
+- MariaDB server (local or remote)  
+- Docker & Docker Compose (for container setup)  
+- [Postman](https://www.postman.com/) or similar (optional, for API testing)  
 
 ---
 
 ## Installation & Setup
 
+### Local Development
 
-
-1. Create and activate a virtual environment:  
+1. Clone repo and enter directory:  
    ```bash
-   python -m venv venv
-   source venv/bin/activate   # on Windows use `venv\Scripts\activate`
+   git clone https://github.com/mattdelta2/Capstone-Project-Consolidation.git
+   cd Capstone-Project-Consolidation
    ```
 
-2. Install dependencies:  
+2. Create and activate a virtual environment:  
+   ```bash
+   python -m venv venv
+   source venv/bin/activate   # Windows: venv\Scripts\activate
+   ```
+
+3. Install dependencies:  
    ```bash
    pip install -r requirements.txt
    ```
 
-3. Copy and configure environment variables:  
+4. Copy and configure environment variables:  
    ```bash
    cp .env.example .env
-   # Edit .env with SECRET_KEY, DB_*, EMAIL_*, X_* values
+   # Fill in SECRET_KEY, DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, EMAIL_*, X_* 
    ```
 
-4. Apply database migrations:  
+5. Apply migrations and create a superuser:  
    ```bash
    python manage.py migrate
-   ```
-
-5. Create a superuser:  
-   ```bash
    python manage.py createsuperuser
    ```
 
 ---
 
+### Docker (Recommended)
+
+1. Build and run containers:  
+   ```bash
+   docker compose up --build -d
+   ```
+
+2. Apply migrations inside the web container:  
+   ```bash
+   docker compose exec web python manage.py migrate
+   docker compose exec web python manage.py createsuperuser
+   ```
+
+3. Access the app at `http://localhost:8000/` and admin at `http://localhost:8000/admin/`.
+
+---
+
 ## Running the Application
+
+If you’re not using Docker:
 
 ```bash
 python manage.py runserver
-```  
+```
 
-- Visit `http://localhost:8000/` for the site  
-- Use `http://localhost:8000/admin/` for the admin interface  
+Visit `http://localhost:8000/` for the website.
 
 ---
 
-## Running Tests
+## API Documentation
+
+Import `NewsPortal.postman_collection.json` into Postman to test endpoints manually.
+
+---
+
+## Testing & Coverage
+
+Run automated tests with coverage reporting:
 
 ```bash
-pytest
-```  
+pytest --cov=news_portal --cov-report=html
+```
 
-- Aim for 100% coverage on API endpoints and core logic  
+Open `htmlcov/index.html` to review coverage details.
 
 ---
-
-
 
 ## Common Issues
 
-- **MariaDB “Access denied”**: verify `DB_USER` and `DB_PASSWORD`.  
-- **Token-auth returning 401**: ensure you’re POSTing to `/api-token-auth/` with JSON body.  
-- **Missing migrations**: run `python manage.py makemigrations` then `migrate`.  
+- MariaDB “Access denied”: verify `DB_USER` & `DB_PASSWORD` in `.env`.  
+- Token-auth 401: POST JSON to `/api-token-auth/` with correct credentials.  
+- Static files missing: run `python manage.py collectstatic` when DEBUG=False.  
+- Migration conflicts: delete conflicting migration files and re-run `makemigrations`.  
 
 ---
-
-## API Endpoints
-
-### Authentication
-
-- `POST /api-token-auth/`  
-  Request:  
-  ```json
-  { "username": "user", "password": "pass" }
-  ```  
-  Response:  
-  ```json
-  { "token": "abc123" }
-  ```
-
-### Articles
-
-- `GET /api/articles/`  
-  List approved articles for your subscriptions.  
-  Query parameters:  
-  - `publisher=<id>`  
-  - `journalist=<id>`  
-  - `tag=<name>`
-
-- `GET /api/articles/<id>/`  
-  Retrieve a single article by ID.
-
-### Subscriptions
-
-- `POST /api/newsletters/subscribe/`  
-  ```json
-  { "type": "publisher", "id": 4 }
-  ```
-
-- `DELETE /api/newsletters/unsubscribe/`  
-  ```json
-  { "type": "journalist", "id": 9 }
-  ```
